@@ -21,7 +21,6 @@ class TelemedProcessor(Node):
 
     def cb(self, msg: Float32MultiArray):
         # ----- PLACEHOLDER PROCESSING -----
-        # Example: mean-center the signal (replace with your real pipeline)
         if len(msg.data) == 0:
             return
         mu = sum(msg.data) / float(len(msg.data))
