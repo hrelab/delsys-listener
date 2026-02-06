@@ -48,7 +48,6 @@ class StretchSimControlNode(Node):
 
         # msg.data already rectified+RMS (from delsys_listener), so just threshold it
         emg_active = [bool(float(x) >= thr) for x in msg.data]
-        out.emg_active = emg_active
 
         out = StretchSimSignals()
         out.header.stamp = self.get_clock().now().to_msg()
