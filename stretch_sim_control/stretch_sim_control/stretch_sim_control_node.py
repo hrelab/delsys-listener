@@ -53,7 +53,7 @@ class StretchSimControlNode(Node):
         out.header.stamp = self.get_clock().now().to_msg()
         out.header.frame_id = ""
         out.smg = smg
-        out.emg_active = emg_active
+        out.emg = emg_active
 
         self.pub.publish(out)
 
