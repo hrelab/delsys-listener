@@ -20,16 +20,17 @@ class TelemedProcessor(Node):
         self.get_logger().info(f"Publishing to: {output_topic}")
 
     def cb(self, msg: Float32MultiArray):
-        # ----- PLACEHOLDER PROCESSING -----
-        if len(msg.data) == 0:
-            return
-        mu = sum(msg.data) / float(len(msg.data))
-        processed = [x - mu for x in msg.data]
-        # ----------------------------------
-
-        out = Float32MultiArray()
-        out.data = processed
-        self.pub.publish(out)
+        ## None needed for this application
+        # # ----- PLACEHOLDER PROCESSING -----
+        # if len(msg.data) == 0:
+        #     return
+        # mu = sum(msg.data) / float(len(msg.data))
+        # processed = [x - mu for x in msg.data]
+        # # ----------------------------------
+        # out = Float32MultiArray()
+        # out.data = processed
+        
+        self.pub.publish(msg)
 
 
 def main():

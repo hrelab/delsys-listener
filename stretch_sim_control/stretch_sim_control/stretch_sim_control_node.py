@@ -2,8 +2,6 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import Float32MultiArray
-from message_filters import Subscriber, ApproximateTimeSynchronizer
-
 from stretch_sim_interfaces.msg import StretchSimSignals
 
 
@@ -15,57 +13,48 @@ class StretchSimControlNode(Node):
         self.declare_parameter('telemed_topic', '/telemed-data/processed')
         self.declare_parameter('output_topic', '/stretch_sim/signals')
 
-        delsys_topic = self.get_parameter('delsys_topic').get_parameter_value().string_value
-        telemed_topic = self.get_parameter('telemed_topic').get_parameter_value().string_value
-        output_topic = self.get_parameter('output_topic').get_parameter_value().string_value
+        # Threshold for EMG "active" detection
+        self.declare_parameter('emg_threshold', 0.05)
 
-        # Publisher for custom message
+        delsys_topic = self.get_parameter('delsys_topic').value
+        telemed_topic = self.get_parameter('telemed_topic').value
+        output_topic = self.get_parameter('output_topic').value
+
         self.pub = self.create_publisher(StretchSimSignals, output_topic, 10)
 
-        # message_filters subscribers
-        self.sub_delsys = Subscriber(self, Float32MultiArray, delsys_topic)
-        self.sub_telemed = Subscriber(self, Float32MultiArray, telemed_topic)
+        self.latest_smg = None
 
-        # Approximate sync since these streams usually won't be perfectly aligned
-        self.sync = ApproximateTimeSynchronizer(
-            [self.sub_delsys, self.sub_telemed],
-            queue_size=20,
-            slop=0.02,  # seconds; tune as needed
-            allow_headerless=True
+        self.sub_telemed = self.create_subscription(
+            Float32MultiArray, telemed_topic, self.telemed_cb, 10
         )
-        self.sync.registerCallback(self.synced_cb)
+        self.sub_delsys = self.create_subscription(
+            Float32MultiArray, delsys_topic, self.delsys_cb, 10
+        )
 
-        self.get_logger().info(f"Subscribing delsys:  {delsys_topic}")
-        self.get_logger().info(f"Subscribing telemed: {telemed_topic}")
-        self.get_logger().info(f"Publishing:         {output_topic}")
+        self.get_logger().info(f"Subscribing telemed (SMG passthrough): {telemed_topic}")
+        self.get_logger().info(f"Subscribing delsys  (EMG threshold):   {delsys_topic}")
+        self.get_logger().info(f"Publishing StretchSimSignals:          {output_topic}")
 
-    def process_signals(self, delsys_vals, telemed_vals):
-        """
-        Replace this with whatever processing you want.
-        Return:
-          smg_float64_list, emg_int_list
-        """
-        # EXAMPLE PLACEHOLDER:
-        # - smg: concatenate both streams as float64
-        smg = [float(x) for x in (delsys_vals + telemed_vals)]
+    def telemed_cb(self, msg: Float32MultiArray):
+        # Pass-through: store as float64 list for the outgoing message
+        self.latest_smg = [float(x) for x in msg.data]
 
-        # - emg: convert delsys stream into ints (toy example)
-        #   (You will almost certainly change this logic.)
-        emg = [int(round(abs(x) * 1000.0)) for x in delsys_vals]
+    def delsys_cb(self, msg: Float32MultiArray):
+        # If we haven't received telemed yet, either publish empty smg or skip.
+        # Here: publish empty smg until telemed arrives.
+        smg = self.latest_smg if self.latest_smg is not None else []
 
-        return smg, emg
+        thr = float(self.get_parameter('emg_threshold').value)
 
-    def synced_cb(self, delsys_msg: Float32MultiArray, telemed_msg: Float32MultiArray):
-        delsys_vals = list(delsys_msg.data)
-        telemed_vals = list(telemed_msg.data)
-
-        smg, emg = self.process_signals(delsys_vals, telemed_vals)
+        # msg.data already rectified+RMS (from delsys_listener), so just threshold it
+        emg_active = [bool(float(x) >= thr) for x in msg.data]
+        out.emg_active = emg_active
 
         out = StretchSimSignals()
         out.header.stamp = self.get_clock().now().to_msg()
-        out.header.frame_id = ""  # set if you want
+        out.header.frame_id = ""
         out.smg = smg
-        out.emg = emg
+        out.emg = emg_active
 
         self.pub.publish(out)
 
