@@ -7,8 +7,8 @@ class TelemedProcessor(Node):
     def __init__(self):
         super().__init__('telemed_processor')
 
-        self.declare_parameter('input_topic', 'telemed-data')
-        self.declare_parameter('output_topic', 'telemed-data/processed')
+        self.declare_parameter('input_topic', 'telemed_data')
+        self.declare_parameter('output_topic', 'telemed_data/processed')
 
         input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
         output_topic = self.get_parameter('output_topic').get_parameter_value().string_value
@@ -29,7 +29,7 @@ class TelemedProcessor(Node):
         # # ----------------------------------
         # out = Float32MultiArray()
         # out.data = processed
-        
+
         self.pub.publish(msg)
 
 

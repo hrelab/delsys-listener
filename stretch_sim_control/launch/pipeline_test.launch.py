@@ -12,7 +12,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'delsys_rate_hz': 2000.0,
-                'telemed_rate_hz': 100.0,
+                'telemed_rate_hz': 30.0,
                 'delsys_channels': 16,
             }],
         ),

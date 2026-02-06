@@ -9,8 +9,8 @@ class StretchSimControlNode(Node):
     def __init__(self):
         super().__init__('stretch_sim_control')
 
-        self.declare_parameter('delsys_topic', '/delsys-data/processed')
-        self.declare_parameter('telemed_topic', '/telemed-data/processed')
+        self.declare_parameter('delsys_topic', '/delsys_data/processed')
+        self.declare_parameter('telemed_topic', '/telemed_data/processed')
         self.declare_parameter('output_topic', '/stretch_sim/signals')
 
         # Threshold for EMG "active" detection
@@ -54,7 +54,7 @@ class StretchSimControlNode(Node):
         out.header.stamp = self.get_clock().now().to_msg()
         out.header.frame_id = ""
         out.smg = smg
-        out.emg = emg_active
+        out.emg_active = emg_active
 
         self.pub.publish(out)
 
