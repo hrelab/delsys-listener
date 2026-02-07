@@ -18,7 +18,7 @@ def generate_launch_description():
         # -------- Declare arguments --------
         DeclareLaunchArgument(
             'emg_threshold',
-            default_value='0.05',
+            default_value='0.8',
             description='Threshold applied to RMS EMG signal',
         ),
         DeclareLaunchArgument(
@@ -38,12 +38,12 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'telemed_rate_hz',
-            default_value='100.0',
+            default_value='30.0',
             description='Mock telemed publish rate (Hz)',
         ),
         DeclareLaunchArgument(
             'delsys_channels',
-            default_value='16',
+            default_value='4',
             description='Number of delsys channels in mock publisher',
         ),
 
@@ -73,7 +73,7 @@ def generate_launch_description():
                 'input_topic': 'delsys/raw_data',
                 'output_topic': 'delsys/processed_data',
                 'sample_rate_hz': delsys_rate_hz,
-                'rms_window_ms': 200.0,
+                'rms_window_ms': 100.0,
             }],
         ),
 
