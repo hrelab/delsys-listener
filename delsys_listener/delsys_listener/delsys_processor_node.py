@@ -52,8 +52,8 @@ class DelsysProcessor(Node):
     def __init__(self):
         super().__init__('delsys_processor')
 
-        self.declare_parameter('input_topic', 'delsys_data')
-        self.declare_parameter('output_topic', 'delsys_data/processed')
+        self.declare_parameter('input_topic', '/delsys/raw_data')
+        self.declare_parameter('output_topic', '/delsys/processed_data')
 
         # sampling rate can vary
         self.declare_parameter('sample_rate_hz', 2000.0)

@@ -13,7 +13,7 @@ def generate_launch_description():
             parameters=[{
                 'delsys_rate_hz': 2000.0,
                 'telemed_rate_hz': 30.0,
-                'delsys_channels': 16,
+                'delsys_channels': 4,
             }],
         ),
 
@@ -25,7 +25,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'sample_rate_hz': 2000.0,
-                'rms_window_ms': 200.0,
+                'rms_window_ms': 100.0,
             }],
         ),
 
@@ -44,7 +44,7 @@ def generate_launch_description():
             name='stretch_sim_control',
             output='screen',
             parameters=[{
-                'emg_threshold': 0.05,
+                'emg_threshold': 0.7,
             }],
         ),
     ])

@@ -9,8 +9,8 @@ class StretchSimControlNode(Node):
     def __init__(self):
         super().__init__('stretch_sim_control')
 
-        self.declare_parameter('delsys_topic', '/delsys_data/processed')
-        self.declare_parameter('telemed_topic', '/telemed_data/processed')
+        self.declare_parameter('delsys_topic', '/delsys/processed_data')
+        self.declare_parameter('telemed_topic', '/telemed/processed_data')
         self.declare_parameter('output_topic', '/stretch_sim/signals')
 
         # Threshold for EMG "active" detection
