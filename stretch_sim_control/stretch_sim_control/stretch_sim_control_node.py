@@ -16,6 +16,10 @@ class StretchSimControlNode(Node):
         # Threshold for EMG "active" detection
         self.declare_parameter('emg_threshold', 0.05)
 
+        # NEW: EMG channel handling
+        self.declare_parameter('emg_channel_count', 1)   # how many channels to consider
+        self.declare_parameter('emg_mode', 'first')      # 'first', 'any', 'all'
+
         delsys_topic = self.get_parameter('delsys_topic').value
         telemed_topic = self.get_parameter('telemed_topic').value
         output_topic = self.get_parameter('output_topic').value
@@ -45,15 +49,31 @@ class StretchSimControlNode(Node):
         smg = self.latest_smg if self.latest_smg is not None else []
 
         thr = float(self.get_parameter('emg_threshold').value)
+        n_ch = int(self.get_parameter('emg_channel_count').value)
+        mode = self.get_parameter('emg_mode').value
 
-        # msg.data already rectified+RMS (from delsys_listener), so just threshold it
-        emg_active = [bool(float(x) >= thr) for x in msg.data]
+        # Safety: clamp channel count
+        n_ch = max(1, min(n_ch, len(msg.data)))
+
+        # Threshold EMG channels
+        active_channels = [
+            float(x) >= thr
+            for x in msg.data[:n_ch]
+        ]
+
+        # Combine channels → single bool
+        if mode == 'first':
+            emg_active = active_channels[0]
+        elif mode == 'all':
+            emg_active = all(active_channels)
+        else:  # 'any' (default)
+            emg_active = any(active_channels)
 
         out = StretchSimSignals()
         out.header.stamp = self.get_clock().now().to_msg()
         out.header.frame_id = ""
         out.smg = smg
-        out.emg = emg_active
+        out.emg = [emg_active]
 
         self.pub.publish(out)
 
