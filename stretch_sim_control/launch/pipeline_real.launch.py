@@ -45,7 +45,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'output_topic',
-            default_value='/stretch_sim/signals',
+            default_value='stretch_sim/signals',
             description='Final StretchSimSignals output topic',
         ),
         DeclareLaunchArgument(
@@ -55,12 +55,12 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'rms_window_ms',
-            default_value='200.0',
+            default_value='100.0',
             description='RMS window duration (ms) for delsys processing',
         ),
         DeclareLaunchArgument(
             'emg_threshold',
-            default_value='0.05',
+            default_value='0.6',
             description='Threshold applied to (rectified+RMS) EMG signal',
         ),
         DeclareLaunchArgument(
