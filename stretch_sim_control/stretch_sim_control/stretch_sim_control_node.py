@@ -14,11 +14,17 @@ class StretchSimControlNode(Node):
         self.declare_parameter('output_topic', 'stretch_sim/signals')
 
         # Threshold for EMG "active" detection
-        self.declare_parameter('emg_threshold', 0.05)
+        self.declare_parameter('emg_threshold', 0.6)
 
         # NEW: EMG channel handling
         self.declare_parameter('emg_channel_count', 1)   # how many channels to consider
         self.declare_parameter('emg_mode', 'first')      # 'first', 'any', 'all'
+
+        # Refractory period (per EMG channel)
+        self.declare_parameter('emg_refractory_sec', 1.0)
+
+        # Per-channel refractory state: next time (ns) a channel is allowed to output True again
+        self._next_allowed_ns = []
 
         delsys_topic = self.get_parameter('delsys_topic').value
         telemed_topic = self.get_parameter('telemed_topic').value
@@ -56,18 +62,38 @@ class StretchSimControlNode(Node):
         n_ch = max(1, min(n_ch, len(msg.data)))
 
         # Threshold EMG channels
-        active_channels = [
-            float(x) >= thr
-            for x in msg.data[:n_ch]
-        ]
+        active_channels = [float(x) >= thr for x in msg.data[:n_ch]]
+
+        # --- Refractory gating (per channel) ---
+        refractory_sec = float(self.get_parameter('emg_refractory_sec').value)
+        refractory_ns = int(refractory_sec * 1e9)
+        now_ns = int(self.get_clock().now().nanoseconds)
+
+        # Ensure state matches channel count
+        if len(self._next_allowed_ns) != n_ch:
+            self._next_allowed_ns = [0] * n_ch
+
+        gated_channels = [False] * n_ch
+        for i, is_active in enumerate(active_channels):
+            # If still in refractory, force False
+            if now_ns < self._next_allowed_ns[i]:
+                gated_channels[i] = False
+                continue
+
+            if is_active:
+                gated_channels[i] = True
+                self._next_allowed_ns[i] = now_ns + refractory_ns
+            else:
+                gated_channels[i] = False
+        # --------------------------------------
 
         # Combine channels → single bool
         if mode == 'first':
-            emg_active = active_channels[0]
+            emg_active = gated_channels[0]
         elif mode == 'all':
-            emg_active = all(active_channels)
+            emg_active = all(gated_channels)
         else:  # 'any' (default)
-            emg_active = any(active_channels)
+            emg_active = any(gated_channels)
 
         out = StretchSimSignals()
         out.header.stamp = self.get_clock().now().to_msg()

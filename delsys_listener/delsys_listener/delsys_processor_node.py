@@ -57,7 +57,7 @@ class DelsysProcessor(Node):
 
         # sampling rate can vary
         self.declare_parameter('sample_rate_hz', 2000.0)
-        self.declare_parameter('rms_window_ms', 200.0)
+        self.declare_parameter('rms_window_ms', 100.0)
 
         input_topic = self.get_parameter('input_topic').value
         output_topic = self.get_parameter('output_topic').value

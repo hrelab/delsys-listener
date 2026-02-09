@@ -9,6 +9,7 @@ def generate_launch_description():
     emg_threshold = LaunchConfiguration('emg_threshold')
     emg_channel_count = LaunchConfiguration('emg_channel_count')
     emg_mode = LaunchConfiguration('emg_mode')
+    emg_refractory_sec = LaunchConfiguration('emg_refractory_sec')
 
     sample_rate_hz = LaunchConfiguration('sample_rate_hz')
     rms_window_ms = LaunchConfiguration('rms_window_ms')
@@ -73,6 +74,11 @@ def generate_launch_description():
             default_value='first',
             description="How to combine EMG channels: 'first', 'any', or 'all'",
         ),
+        DeclareLaunchArgument(
+            'emg_refractory_sec',
+            default_value='1.0',
+            description='Per-channel EMG refractory period (seconds)',
+        ),
 
         # -------- Delsys processing --------
         Node(
@@ -114,6 +120,7 @@ def generate_launch_description():
                 'emg_threshold': emg_threshold,
                 'emg_channel_count': emg_channel_count,
                 'emg_mode': emg_mode,
+                'emg_refractory_sec': emg_refractory_sec,
             }],
         ),
     ])
