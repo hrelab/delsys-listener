@@ -18,7 +18,7 @@ def generate_launch_description():
         # -------- Declare arguments --------
         DeclareLaunchArgument(
             'emg_threshold',
-            default_value='0.8',
+            default_value='0.6',
             description='Threshold applied to RMS EMG signal',
         ),
         DeclareLaunchArgument(
