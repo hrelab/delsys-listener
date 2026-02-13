@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
 from stretch_sim_interfaces.msg import StretchSimSignals
 
 
@@ -11,10 +11,11 @@ class StretchSimControlNode(Node):
 
         self.declare_parameter('delsys_topic', 'delsys/processed_data')
         self.declare_parameter('telemed_topic', 'telemed/processed_data')
-        self.declare_parameter('output_topic', 'stretch_sim/signals')
+        self.declare_parameter('output_smg', 'stretch_sim/smg')
+        self.declare_parameter('output_topic', 'stretch_sim/emg')
 
         # Threshold for EMG "active" detection
-        self.declare_parameter('emg_threshold', 0.6)
+        self.declare_parameter('emg_threshold', 0.8)
 
         # NEW: EMG channel handling
         self.declare_parameter('emg_channel_count', 1)   # how many channels to consider
@@ -28,9 +29,11 @@ class StretchSimControlNode(Node):
 
         delsys_topic = self.get_parameter('delsys_topic').value
         telemed_topic = self.get_parameter('telemed_topic').value
-        output_topic = self.get_parameter('output_topic').value
+        output_smg = self.get_parameter('output_smg').value
+        output_emg = self.get_parameter('output_topic').value
 
-        self.pub = self.create_publisher(StretchSimSignals, output_topic, 10)
+        self.pub = self.create_publisher(Float64MultiArray, output_smg, 10)
+        self.pub = self.create_publisher(Bool, output_emg, 10)
 
         self.latest_smg = None
 
@@ -43,17 +46,15 @@ class StretchSimControlNode(Node):
 
         self.get_logger().info(f"Subscribing telemed (SMG passthrough): {telemed_topic}")
         self.get_logger().info(f"Subscribing delsys  (EMG threshold):   {delsys_topic}")
-        self.get_logger().info(f"Publishing StretchSimSignals:          {output_topic}")
+        self.get_logger().info(f"Publishing stretch_sim (SMG):          {output_smg}")
+        self.get_logger().info(f"Publishing stretch_sim (EMG):          {output_emg}")
 
     def telemed_cb(self, msg: Float32MultiArray):
-        # Pass-through: store as float64 list for the outgoing message
-        self.latest_smg = [float(x) for x in msg.data]
+        out = Float64MultiArray()
+        out.data = [float(x) for x in msg.data]
+        self.sub_telemed.publish(out)
 
     def delsys_cb(self, msg: Float32MultiArray):
-        # If we haven't received telemed yet, either publish empty smg or skip.
-        # Here: publish empty smg until telemed arrives.
-        smg = self.latest_smg if self.latest_smg is not None else []
-
         thr = float(self.get_parameter('emg_threshold').value)
         n_ch = int(self.get_parameter('emg_channel_count').value)
         mode = self.get_parameter('emg_mode').value
@@ -75,7 +76,6 @@ class StretchSimControlNode(Node):
 
         gated_channels = [False] * n_ch
         for i, is_active in enumerate(active_channels):
-            # If still in refractory, force False
             if now_ns < self._next_allowed_ns[i]:
                 gated_channels[i] = False
                 continue
@@ -95,13 +95,9 @@ class StretchSimControlNode(Node):
         else:  # 'any' (default)
             emg_active = any(gated_channels)
 
-        out = StretchSimSignals()
-        out.header.stamp = self.get_clock().now().to_msg()
-        out.header.frame_id = ""
-        out.smg = smg
-        out.emg = [emg_active]
-
-        self.pub.publish(out)
+        out = Bool()
+        out.data = bool(emg_active)
+        self.sub_delsys.publish(out)
 
 
 def main():

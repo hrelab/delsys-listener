@@ -30,7 +30,11 @@ class TelemedProcessor(Node):
         # out = Float32MultiArray()
         # out.data = processed
 
-        self.pub.publish(msg)
+        clamped = [max(0.0, min(1.0, x)) for x in msg.data]
+        out = Float32MultiArray()
+        out.data = clamped
+
+        self.pub.publish(out)
 
 
 def main():
