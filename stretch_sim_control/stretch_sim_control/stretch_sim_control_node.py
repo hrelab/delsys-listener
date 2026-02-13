@@ -31,8 +31,8 @@ class StretchSimControlNode(Node):
         output_smg = self.get_parameter('output_smg').value
         output_emg = self.get_parameter('output_topic').value
 
-        self.pub = self.create_publisher(Float64MultiArray, output_smg, 10)
-        self.pub = self.create_publisher(Bool, output_emg, 10)
+        self.pub_smg = self.create_publisher(Float64MultiArray, output_smg, 10)
+        self.pub_emg = self.create_publisher(Bool, output_emg, 10)
 
         self.latest_smg = None
 
@@ -51,7 +51,7 @@ class StretchSimControlNode(Node):
     def telemed_cb(self, msg: Float32MultiArray):
         out = Float64MultiArray()
         out.data = [float(x) for x in msg.data]
-        self.sub_telemed.publish(out)
+        self.pub_smg.publish(out)
 
     def delsys_cb(self, msg: Float32MultiArray):
         thr = float(self.get_parameter('emg_threshold').value)
@@ -96,7 +96,7 @@ class StretchSimControlNode(Node):
 
         out = Bool()
         out.data = bool(emg_active)
-        self.sub_delsys.publish(out)
+        self.pub_emg.publish(out)
 
 
 def main():
