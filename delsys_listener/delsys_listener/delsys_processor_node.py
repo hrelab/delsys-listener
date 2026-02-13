@@ -87,7 +87,7 @@ class DelsysProcessor(Node):
         )
 
     def _on_params(self, params):
-        # If sample rate or window changes, update rolling RMS window
+        # If sample rate or window changes, update rolling RMS window!
         changed = False
         new_fs = self.fs
         new_win = self.win_ms
