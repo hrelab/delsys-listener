@@ -11,7 +11,7 @@ class StretchSimControlNode(Node):
         self.declare_parameter('delsys_topic', 'delsys/processed_data')
         self.declare_parameter('telemed_topic', 'telemed/processed_data')
         self.declare_parameter('output_smg', 'stretch_sim/smg')
-        self.declare_parameter('output_topic', 'stretch_sim/emg')
+        self.declare_parameter('output_emg', 'stretch_sim/emg')
 
         # Threshold for EMG "active" detection
         self.declare_parameter('emg_threshold', 0.8)
@@ -29,7 +29,7 @@ class StretchSimControlNode(Node):
         delsys_topic = self.get_parameter('delsys_topic').value
         telemed_topic = self.get_parameter('telemed_topic').value
         output_smg = self.get_parameter('output_smg').value
-        output_emg = self.get_parameter('output_topic').value
+        output_emg = self.get_parameter('output_emg').value
 
         self.pub_smg = self.create_publisher(Float64MultiArray, output_smg, 10)
         self.pub_emg = self.create_publisher(Bool, output_emg, 10)
