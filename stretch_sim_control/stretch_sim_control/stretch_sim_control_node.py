@@ -2,7 +2,6 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
-from stretch_sim_interfaces.msg import StretchSimSignals
 
 
 class StretchSimControlNode(Node):
