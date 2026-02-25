@@ -5,7 +5,7 @@ import time
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
-from stretch_sim_interfaces.msg import Delsys
+from stretch_sim_interfaces.msg import DelsysMsg
 
 KEYS = ["EMG 1", "EMG 2", "EMG 3", "EMG 4", "ACC X", "ACC Y", "ACC Z", "GYRO X", "GYRO Y", "GYRO Z"]
 
@@ -34,7 +34,7 @@ class MockDelsysTelemedPublisher(Node):
         self.telemed_rate = float(self.get_parameter('telemed_rate_hz').value)
         self.telemed_period = float(self.get_parameter('telemed_period_sec').value)
 
-        self.pub_delsys = self.create_publisher(Delsys, self.delsys_topic, 10)
+        self.pub_delsys = self.create_publisher(DelsysMsg, self.delsys_topic, 10)
         self.pub_telemed = self.create_publisher(Float32MultiArray, self.telemed_topic, 10)
 
         # Time reference for sine wave
@@ -72,7 +72,7 @@ class MockDelsysTelemedPublisher(Node):
             msgD.gyro_y.append(float(data.get("GYRO Y", float("nan"))))
             msgD.gyro_z.append(float(data.get("GYRO Z", float("nan"))))
 
-        msg = Delsys()
+        msg = DelsysMsg()
         n_ch = max(1, int(self.get_parameter('delsys_sensors').value))
 
         # Uniform random in [-1, 1] for all data in Delsys() custom message
