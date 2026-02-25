@@ -48,17 +48,23 @@ class StretchSimControlNode(Node):
         self.get_logger().info(f"Publishing stretch_sim (SMG):          {output_smg}")
         self.get_logger().info(f"Publishing stretch_sim (EMG):          {output_emg}")
 
-    def telemed_cb(self, msg: DelsysMsg):
+    def telemed_cb(self, msg: SmgMsg):
         out = Float64MultiArray()
         out.data = [float(x) for x in msg.data]
         self.pub_smg.publish(out)
 
-    def delsys_cb(self, msg: Float32MultiArray):
+    def delsys_cb(self, msg: EmgMsg):
         thr = float(self.get_parameter('emg_threshold').value)
         mode = self.get_parameter('emg_mode').value
 
+        # Combining sensors into one list
+        nSens = len(msg.sensor_name)
+        data = []
+        for i in range(nSens):
+            data.extend([msg.emg1[i], msg.emg2[i], msg.emg3[i], msg.emg4[i]])
+
         # Threshold EMG channels
-        active_channels = [float(x) >= thr for x in msg.data[:n_ch]]
+        active_channels = [float(x) >= thr for x in data]
 
         # --- Refractory gating (per channel) ---
         refractory_sec = float(self.get_parameter('emg_refractory_sec').value)
