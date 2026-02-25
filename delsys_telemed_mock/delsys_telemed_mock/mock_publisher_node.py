@@ -12,8 +12,8 @@ class MockDelsysTelemedPublisher(Node):
         super().__init__('mock_delsys_telemed_publisher')
 
         # Topics
-        self.declare_parameter('delsys_topic', '/delsys/raw_data')
-        self.declare_parameter('telemed_topic', '/telemed/raw_data')
+        self.declare_parameter('delsys_topic', '/raw_data/emg')
+        self.declare_parameter('telemed_topic', '/raw_data/smg')
 
         # Rates (Hz)
         self.declare_parameter('delsys_rate_hz', 2000.0)

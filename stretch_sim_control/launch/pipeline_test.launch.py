@@ -60,8 +60,8 @@ def generate_launch_description():
             name='mock_delsys_telemed_publisher',
             output='screen',
             parameters=[{
-                'delsys_topic': 'delsys/raw_data',
-                'telemed_topic': 'telemed/raw_data',
+                'delsys_topic': 'raw_data/emg',
+                'telemed_topic': 'raw_data/smg',
                 'delsys_rate_hz': delsys_rate_hz,
                 'telemed_rate_hz': telemed_rate_hz,
                 'delsys_channels': delsys_channels,
@@ -76,8 +76,8 @@ def generate_launch_description():
             name='delsys_processor',
             output='screen',
             parameters=[{
-                'input_topic': 'delsys/raw_data',
-                'output_topic': 'delsys/processed_data',
+                'input_topic': 'raw_data/emg',
+                'output_topic': 'processed/emg',
                 'sample_rate_hz': delsys_rate_hz,
                 'rms_window_ms': 100.0,
             }],
@@ -90,8 +90,8 @@ def generate_launch_description():
             name='telemed_processor',
             output='screen',
             parameters=[{
-                'input_topic': 'telemed/raw_data',
-                'output_topic': 'telemed/processed_data',
+                'input_topic': 'raw_data/smg',
+                'output_topic': 'processed/smg',
             }],
         ),
 
@@ -102,9 +102,10 @@ def generate_launch_description():
             name='stretch_sim_control',
             output='screen',
             parameters=[{
-                'delsys_topic': 'delsys/processed_data',
-                'telemed_topic': 'telemed/processed_data',
-                'output_topic': 'stretch_sim/signals',
+                'delsys_topic': 'processed/emg',
+                'telemed_topic': 'processed/smg',
+                'output_emg': 'stretch_sim/emg',
+                'output_smg': 'stretch_sim/smg',
 
                 # NEW PARAMS WIRED IN
                 'emg_threshold': emg_threshold,

@@ -20,34 +20,40 @@ def generate_launch_description():
     delsys_out = LaunchConfiguration('delsys_out')
     telemed_out = LaunchConfiguration('telemed_out')
 
-    output_topic = LaunchConfiguration('output_topic')
+    output_emg = LaunchConfiguration('output_emg')
+    output_smg = LaunchConfiguration('output_smg')
 
     return LaunchDescription([
         # -------- Declare arguments --------
         DeclareLaunchArgument(
             'delsys_in',
-            default_value='delsys/raw_data',
+            default_value='raw_data/emg',
             description='Incoming raw delsys topic',
         ),
         DeclareLaunchArgument(
             'telemed_in',
-            default_value='telemed/raw_data',
+            default_value='raw_data/smg',
             description='Incoming raw telemed topic',
         ),
         DeclareLaunchArgument(
             'delsys_out',
-            default_value='delsys/processed_data',
+            default_value='processed/emg',
             description='Processed delsys output topic',
         ),
         DeclareLaunchArgument(
             'telemed_out',
-            default_value='telemed/processed_data',
+            default_value='processed/smg',
             description='Processed telemed output topic',
         ),
         DeclareLaunchArgument(
-            'output_topic',
-            default_value='stretch_sim/signals',
-            description='Final StretchSimSignals output topic',
+            'output_emg',
+            default_value='stretch_sim/emg',
+            description='Final StretchSimSignals EMG output topic',
+        ),
+        DeclareLaunchArgument(
+            'output_smg',
+            default_value='stretch_sim/smg',
+            description='Final StretchSimSignals SMG output topic',
         ),
         DeclareLaunchArgument(
             'sample_rate_hz',
@@ -115,7 +121,8 @@ def generate_launch_description():
             parameters=[{
                 'delsys_topic': delsys_out,
                 'telemed_topic': telemed_out,
-                'output_topic': output_topic,
+                'output_emg': output_emg,
+                'output_smg': output_smg,
 
                 'emg_threshold': emg_threshold,
                 'emg_channel_count': emg_channel_count,
