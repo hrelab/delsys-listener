@@ -6,7 +6,6 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from stretch_sim_interfaces.msg import Delsys
 
-
 class RollingRMS:
     """Per-channel rolling RMS over a fixed window of samples."""
     def __init__(self, window_size: int):
@@ -53,15 +52,17 @@ class DelsysProcessor(Node):
     def __init__(self):
         super().__init__('delsys_processor')
 
-        self.declare_parameter('input_topic', '/raw_data/emg')
-        self.declare_parameter('output_topic', '/processed/emg')
+        self.declare_parameter('input_topic', 'raw_data/delsys')
+        self.declare_parameter('output_emg', 'processed/emg')
+        self.declare_parameter('output_imu', 'processed/imu')
 
         # sampling rate can vary
         self.declare_parameter('sample_rate_hz', 2000.0)
         self.declare_parameter('rms_window_ms', 100.0)
 
         input_topic = self.get_parameter('input_topic').value
-        output_topic = self.get_parameter('output_topic').value
+        output_emg = self.get_parameter('output_emg').value
+        output_imu = self.get_parameter('output_imu').value
 
         self.fs = float(self.get_parameter('sample_rate_hz').value)
         self.win_ms = float(self.get_parameter('rms_window_ms').value)
@@ -69,11 +70,12 @@ class DelsysProcessor(Node):
         self.window_size = self._compute_window_size(self.fs, self.win_ms)
         self.rms = RollingRMS(self.window_size)
 
-        self.pub = self.create_publisher(Float32MultiArray, output_topic, 10)
-        self.sub = self.create_subscription(Float32MultiArray, input_topic, self.cb, 10)
+        self.pubEMG = self.create_publisher(Float32MultiArray, output_emg, 10)
+        self.pubIMU = self.create_publisher(Float32MultiArray, output_imu, 10)
+        self.sub = self.create_subscription(Delsys, input_topic, self.cb, 10)
 
         self.get_logger().info(f"Listening on: {input_topic}")
-        self.get_logger().info(f"Publishing to: {output_topic}")
+        self.get_logger().info(f"Publishing to: {output_emg} and {output_imu}")
         self._log_window()
 
         # Optional: support runtime param updates (so you can switch 2000 <-> 2222.2222 without restart)
@@ -111,15 +113,22 @@ class DelsysProcessor(Node):
 
         return rclpy.parameter.SetParametersResult(successful=True)
 
-    def cb(self, msg: Float32MultiArray):
+    def cb(self, msg: Delsys):
+        emgData = [msg.emg1, msg.emg2, msg.emg3, msg.emg4]
+        imuData = [msg.acc_x, msg.acc_y, msg.acc_z, msg.gyro_x, msg.gyro_y, msg.gyro_z]
+
         # One sample per channel per message (your current setup)
-        rectified = [abs(float(x)) for x in msg.data]
+        rectified = [abs(float(x)) for x in emgData]
         rms_vals = self.rms.update(rectified)
 
-        out = Float32MultiArray()
-        out.data = rms_vals
-        self.pub.publish(out)
+        outEMG = Float32MultiArray()
+        outEMG.data = rms_vals
 
+        outIMU = Float32MultiArray()
+        outIMU.data = imuData
+
+        self.pubEMG.publish(outEMG)
+        self.pubIMU.publish(outIMU)
 
 def main():
     rclpy.init()
