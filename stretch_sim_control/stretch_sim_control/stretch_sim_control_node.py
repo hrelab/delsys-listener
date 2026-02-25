@@ -68,6 +68,7 @@ class StretchSimControlNode(Node):
         now_ns = int(self.get_clock().now().nanoseconds)
 
         # Ensure state matches channel count
+        n_ch = len(data)
         if len(self._next_allowed_ns) != n_ch:
             self._next_allowed_ns = [0] * n_ch
 
@@ -82,18 +83,9 @@ class StretchSimControlNode(Node):
                 self._next_allowed_ns[i] = now_ns + refractory_ns
             else:
                 gated_channels[i] = False
-        # --------------------------------------
 
-        # Combine channels → single bool
-        if mode == 'first':
-            emg_active = gated_channels[0]
-        elif mode == 'all':
-            emg_active = all(gated_channels)
-        else:  # 'any' (default)
-            emg_active = any(gated_channels)
-
-        out = Bool()
-        out.data = bool(emg_active)
+        out = Int32MultiArray()
+        out.data = [int(x) for x in gated_channels]
         self.pub_emg.publish(out)
 
 
