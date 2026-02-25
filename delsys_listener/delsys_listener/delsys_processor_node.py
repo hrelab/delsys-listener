@@ -114,8 +114,8 @@ class DelsysProcessor(Node):
         return rclpy.parameter.SetParametersResult(successful=True)
 
     def cb(self, msg: Delsys):
-        emgData = [msg.emg1, msg.emg2, msg.emg3, msg.emg4]
-        imuData = [msg.acc_x, msg.acc_y, msg.acc_z, msg.gyro_x, msg.gyro_y, msg.gyro_z]
+        emgData = list(float(msg.emg1, msg.emg2, msg.emg3, msg.emg4))
+        imuData = list(float(msg.acc_x, msg.acc_y, msg.acc_z, msg.gyro_x, msg.gyro_y, msg.gyro_z))
 
         # One sample per channel per message (your current setup)
         rectified = [abs(float(x)) for x in emgData]
