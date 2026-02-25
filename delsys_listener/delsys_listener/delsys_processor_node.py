@@ -3,8 +3,7 @@ from collections import deque
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
-from stretch_sim_interfaces.msg import Delsys
+from stretch_sim_interfaces.msg import DelsysMsg, EmgMsg, ImuMsg
 
 class RollingRMS:
     """Per-channel rolling RMS over a fixed window of samples."""
@@ -70,9 +69,9 @@ class DelsysProcessor(Node):
         self.window_size = self._compute_window_size(self.fs, self.win_ms)
         self.rms = RollingRMS(self.window_size)
 
-        self.pubEMG = self.create_publisher(Float32MultiArray, output_emg, 10)
-        self.pubIMU = self.create_publisher(Float32MultiArray, output_imu, 10)
-        self.sub = self.create_subscription(Delsys, input_topic, self.cb, 10)
+        self.pubEMG = self.create_publisher(EmgMsg, output_emg, 10)
+        self.pubIMU = self.create_publisher(ImuMsg, output_imu, 10)
+        self.sub = self.create_subscription(DelsysMsg, input_topic, self.cb, 10)
 
         self.get_logger().info(f"Listening on: {input_topic}")
         self.get_logger().info(f"Publishing to: {output_emg} and {output_imu}")
@@ -113,20 +112,40 @@ class DelsysProcessor(Node):
 
         return rclpy.parameter.SetParametersResult(successful=True)
 
-    def cb(self, msg: Delsys):
-        emgData = list(float(msg.emg1, msg.emg2, msg.emg3, msg.emg4))
-        imuData = list(float(msg.acc_x, msg.acc_y, msg.acc_z, msg.gyro_x, msg.gyro_y, msg.gyro_z))
+    def cb(self, msg: DelsysMsg):
+        nSens = len(msg.sensor_name)
+        emgData = []
 
-        # One sample per channel per message (your current setup)
+        outEMG = EmgMsg()
+        outIMU = ImuMsg()
+
+        # Combine all sensors into a single list for easy processing
+        for i in range(nSens):
+            emgData.extend([msg.emg1[i], msg.emg2[i], msg.emg3[i], msg.emg4[i]])
+
+        # Process EMG data
         rectified = [abs(float(x)) for x in emgData]
         rms_vals = self.rms.update(rectified)
 
-        outEMG = Float32MultiArray()
-        outEMG.data = rms_vals
+        # Put Processed EMG data into correct format
+        for i in range(nSens):
+            outEMG.sensor_name.append(msg.sensor_name[i])
+            outEMG.emg1.append(rms_vals[4*i + 0])
+            outEMG.emg2.append(rms_vals[4*i + 1])
+            outEMG.emg3.append(rms_vals[4*i + 2])
+            outEMG.emg4.append(rms_vals[4*i + 3])
+            
+        # Currently no IMU processing
+        for i in range(nSens):
+            outIMU.sensor_name.append(msg.sensor_name[i])
+            outIMU.acc_x.append(msg.acc_x[i])
+            outIMU.acc_y.append(msg.acc_y[i])
+            outIMU.acc_z.append(msg.acc_z[i])
+            outIMU.gyro_x.append(msg.gyro_x[i])
+            outIMU.gyro_y.append(msg.gyro_y[i])
+            outIMU.gyro_z.append(msg.gyro_z[i])
 
-        outIMU = Float32MultiArray()
-        outIMU.data = imuData
-
+        # Publish data
         self.pubEMG.publish(outEMG)
         self.pubIMU.publish(outIMU)
 
