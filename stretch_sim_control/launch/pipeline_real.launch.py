@@ -16,7 +16,8 @@ def generate_launch_description():
     delsys_in = LaunchConfiguration('delsys_in')
     telemed_in = LaunchConfiguration('telemed_in')
 
-    delsys_out = LaunchConfiguration('delsys_out')
+    delsys_out_emg = LaunchConfiguration('delsys_out_emg')
+    delsys_out_imu = LaunchConfiguration('delsys_out_imu')
     telemed_out = LaunchConfiguration('telemed_out')
 
     output_emg = LaunchConfiguration('output_emg')
@@ -35,8 +36,13 @@ def generate_launch_description():
             description='Incoming raw telemed topic',
         ),
         DeclareLaunchArgument(
-            'delsys_out',
+            'delsys_out_emg',
             default_value='processed/emg',
+            description='Processed delsys output topic',
+        ),
+        DeclareLaunchArgument(
+            'delsys_out_imu',
+            default_value='processed/imu',
             description='Processed delsys output topic',
         ),
         DeclareLaunchArgument(
@@ -88,7 +94,8 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'input_topic': delsys_in,
-                'output_topic': delsys_out,
+                'output_emg': delsys_out_emg,
+                'output_imu': delsys_out_imu,
                 'sample_rate_hz': sample_rate_hz,
                 'rms_window_ms': rms_window_ms,
             }],

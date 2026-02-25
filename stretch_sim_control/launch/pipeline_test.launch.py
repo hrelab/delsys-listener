@@ -71,7 +71,8 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'input_topic': 'raw_data/delsys',
-                'output_topic': 'processed/emg',
+                'output_emg': 'processed/emg',
+                'output_imu': 'processed/imu',
                 'sample_rate_hz': delsys_rate_hz,
                 'rms_window_ms': 100.0,
             }],
