@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
-from stretch_sim_interfaces.msg import Delsys
+from stretch_sim_interfaces.msg import DelsysMsg
 
 
 class StretchSimControlNode(Node):
@@ -48,7 +48,7 @@ class StretchSimControlNode(Node):
         self.get_logger().info(f"Publishing stretch_sim (SMG):          {output_smg}")
         self.get_logger().info(f"Publishing stretch_sim (EMG):          {output_emg}")
 
-    def telemed_cb(self, msg: Delsys):
+    def telemed_cb(self, msg: DelsysMsg):
         out = Float64MultiArray()
         out.data = [float(x) for x in msg.data]
         self.pub_smg.publish(out)
