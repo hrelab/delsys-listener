@@ -46,7 +46,6 @@ class StretchSimControlNode(Node):
         self.get_logger().info(f"Publishing stretch_sim (EMG):          {output_emg}")
 
     def telemed_cb(self, msg: SmgMsg):
-        print(msg.smg)
         self.pub_smg.publish(msg.smg)
 
     def delsys_cb(self, msg: EmgMsg):

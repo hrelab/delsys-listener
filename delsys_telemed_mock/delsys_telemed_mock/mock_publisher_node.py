@@ -5,7 +5,7 @@ import time
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
-from stretch_sim_interfaces.msg import DelsysMsg
+from stretch_sim_interfaces.msg import DelsysMsg, SmgMsg
 
 KEYS = ["EMG 1", "EMG 2", "EMG 3", "EMG 4", "ACC X", "ACC Y", "ACC Z", "GYRO X", "GYRO Y", "GYRO Z"]
 
@@ -35,7 +35,7 @@ class MockDelsysTelemedPublisher(Node):
         self.telemed_period = float(self.get_parameter('telemed_period_sec').value)
 
         self.pub_delsys = self.create_publisher(DelsysMsg, self.delsys_topic, 10)
-        self.pub_telemed = self.create_publisher(Float32MultiArray, self.telemed_topic, 10)
+        self.pub_telemed = self.create_publisher(SmgMsg, self.telemed_topic, 10)
 
         # Time reference for sine wave
         self.t0 = time.monotonic()
@@ -96,8 +96,8 @@ class MockDelsysTelemedPublisher(Node):
         # Standard sine in [-1,1], mapped to [0,1]
         val = 0.5 * (1.0 + math.sin(omega * t))
 
-        msg = Float32MultiArray()
-        msg.data = [val]
+        msg = SmgMsg()
+        msg.smg = [val]
         self.pub_telemed.publish(msg)
 
 
