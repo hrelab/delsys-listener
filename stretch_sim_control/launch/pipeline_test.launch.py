@@ -7,13 +7,12 @@ from launch_ros.actions import Node
 def generate_launch_description():
     # ---------------- Launch arguments ----------------
     emg_threshold = LaunchConfiguration('emg_threshold')
-    emg_channel_count = LaunchConfiguration('emg_channel_count')
     emg_mode = LaunchConfiguration('emg_mode')
     emg_refractory_sec = LaunchConfiguration('emg_refractory_sec')
 
     delsys_rate_hz = LaunchConfiguration('delsys_rate_hz')
     telemed_rate_hz = LaunchConfiguration('telemed_rate_hz')
-    delsys_channels = LaunchConfiguration('delsys_channels')
+    delsys_sensors = LaunchConfiguration('delsys_sensors')
 
     return LaunchDescription([
         # -------- Declare arguments --------
@@ -21,11 +20,6 @@ def generate_launch_description():
             'emg_threshold',
             default_value='0.6',
             description='Threshold applied to RMS EMG signal',
-        ),
-        DeclareLaunchArgument(
-            'emg_channel_count',
-            default_value='1',
-            description='Number of EMG channels to consider',
         ),
         DeclareLaunchArgument(
             'emg_mode',
@@ -48,9 +42,9 @@ def generate_launch_description():
             description='Mock telemed publish rate (Hz)',
         ),
         DeclareLaunchArgument(
-            'delsys_channels',
-            default_value='4',
-            description='Number of delsys channels in mock publisher',
+            'delsys_sensors',
+            default_value='1',
+            description='Number of delsys sensors in mock publisher',
         ),
 
         # -------- Mock publisher --------
@@ -60,11 +54,11 @@ def generate_launch_description():
             name='mock_delsys_telemed_publisher',
             output='screen',
             parameters=[{
-                'delsys_topic': 'raw_data/emg',
-                'telemed_topic': 'raw_data/smg',
+                'delsys_topic': 'raw_data/delsys',
+                'telemed_topic': 'raw_data/telemed',
                 'delsys_rate_hz': delsys_rate_hz,
                 'telemed_rate_hz': telemed_rate_hz,
-                'delsys_channels': delsys_channels,
+                'delsys_sensors': delsys_sensors,
                 'telemed_period_sec': 3.0,
             }],
         ),
@@ -76,7 +70,7 @@ def generate_launch_description():
             name='delsys_processor',
             output='screen',
             parameters=[{
-                'input_topic': 'raw_data/emg',
+                'input_topic': 'raw_data/delsys',
                 'output_topic': 'processed/emg',
                 'sample_rate_hz': delsys_rate_hz,
                 'rms_window_ms': 100.0,
@@ -90,7 +84,7 @@ def generate_launch_description():
             name='telemed_processor',
             output='screen',
             parameters=[{
-                'input_topic': 'raw_data/smg',
+                'input_topic': 'raw_data/telemed',
                 'output_topic': 'processed/smg',
             }],
         ),
@@ -109,7 +103,6 @@ def generate_launch_description():
 
                 # NEW PARAMS WIRED IN
                 'emg_threshold': emg_threshold,
-                'emg_channel_count': emg_channel_count,
                 'emg_mode': emg_mode,
                 'emg_refractory_sec': emg_refractory_sec,
             }],

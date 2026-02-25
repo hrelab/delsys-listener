@@ -7,7 +7,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
     # ---------------- Launch arguments ----------------
     emg_threshold = LaunchConfiguration('emg_threshold')
-    emg_channel_count = LaunchConfiguration('emg_channel_count')
     emg_mode = LaunchConfiguration('emg_mode')
     emg_refractory_sec = LaunchConfiguration('emg_refractory_sec')
 
@@ -27,12 +26,12 @@ def generate_launch_description():
         # -------- Declare arguments --------
         DeclareLaunchArgument(
             'delsys_in',
-            default_value='raw_data/emg',
+            default_value='raw_data/delsys',
             description='Incoming raw delsys topic',
         ),
         DeclareLaunchArgument(
             'telemed_in',
-            default_value='raw_data/smg',
+            default_value='raw_data/telemed',
             description='Incoming raw telemed topic',
         ),
         DeclareLaunchArgument(
@@ -69,11 +68,6 @@ def generate_launch_description():
             'emg_threshold',
             default_value='0.6',
             description='Threshold applied to (rectified+RMS) EMG signal',
-        ),
-        DeclareLaunchArgument(
-            'emg_channel_count',
-            default_value='1',
-            description='Number of EMG channels to consider',
         ),
         DeclareLaunchArgument(
             'emg_mode',
@@ -125,7 +119,6 @@ def generate_launch_description():
                 'output_smg': output_smg,
 
                 'emg_threshold': emg_threshold,
-                'emg_channel_count': emg_channel_count,
                 'emg_mode': emg_mode,
                 'emg_refractory_sec': emg_refractory_sec,
             }],

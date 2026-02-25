@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
+from stretch_sim_interfaces.msg import Delsys
 
 
 class StretchSimControlNode(Node):
@@ -17,7 +18,6 @@ class StretchSimControlNode(Node):
         self.declare_parameter('emg_threshold', 0.8)
 
         # NEW: EMG channel handling
-        self.declare_parameter('emg_channel_count', 1)   # how many channels to consider
         self.declare_parameter('emg_mode', 'first')      # 'first', 'any', 'all'
 
         # Refractory period (per EMG channel)
@@ -48,18 +48,14 @@ class StretchSimControlNode(Node):
         self.get_logger().info(f"Publishing stretch_sim (SMG):          {output_smg}")
         self.get_logger().info(f"Publishing stretch_sim (EMG):          {output_emg}")
 
-    def telemed_cb(self, msg: Float32MultiArray):
+    def telemed_cb(self, msg: Delsys):
         out = Float64MultiArray()
         out.data = [float(x) for x in msg.data]
         self.pub_smg.publish(out)
 
     def delsys_cb(self, msg: Float32MultiArray):
         thr = float(self.get_parameter('emg_threshold').value)
-        n_ch = int(self.get_parameter('emg_channel_count').value)
         mode = self.get_parameter('emg_mode').value
-
-        # Safety: clamp channel count
-        n_ch = max(1, min(n_ch, len(msg.data)))
 
         # Threshold EMG channels
         active_channels = [float(x) >= thr for x in msg.data[:n_ch]]

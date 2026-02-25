@@ -24,6 +24,7 @@ endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/StretchSimSignals.msg"
+  "msg/Delsys.msg"
   DEPENDENCIES std_msgs
 )
 
