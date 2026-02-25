@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
+from stretch_sim_interfaces.msg import SmgMsg
 
 
 class TelemedProcessor(Node):
@@ -13,13 +13,13 @@ class TelemedProcessor(Node):
         input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
         output_topic = self.get_parameter('output_topic').get_parameter_value().string_value
 
-        self.pub = self.create_publisher(Float32MultiArray, output_topic, 10)
-        self.sub = self.create_subscription(Float32MultiArray, input_topic, self.cb, 10)
+        self.pub = self.create_publisher(SmgMsg, output_topic, 10)
+        self.sub = self.create_subscription(SmgMsg, input_topic, self.cb, 10)
 
         self.get_logger().info(f"Listening on: {input_topic}")
         self.get_logger().info(f"Publishing to: {output_topic}")
 
-    def cb(self, msg: Float32MultiArray):
+    def cb(self, msg: SmgMsg):
         ## None needed for this application
         # # ----- PLACEHOLDER PROCESSING -----
         # if len(msg.data) == 0:
@@ -30,9 +30,10 @@ class TelemedProcessor(Node):
         # out = Float32MultiArray()
         # out.data = processed
 
-        clamped = [max(0.0, min(1.0, x)) for x in msg.data]
-        out = Float32MultiArray()
-        out.data = clamped
+        clamped = [max(0.0, min(1.0, x)) for x in msg.smg]
+        out = SmgMsg()
+        out.sensor_name = msg.sensor_name
+        out.smg = clamped
 
         self.pub.publish(out)
 
