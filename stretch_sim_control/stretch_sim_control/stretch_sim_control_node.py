@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
-from stretch_sim_interfaces.msg import DelsysMsg
+from stretch_sim_interfaces.msg import DelsysMsg, EmgMsg, SmgMsg, ImuMsg
 
 
 class StretchSimControlNode(Node):
@@ -37,10 +37,10 @@ class StretchSimControlNode(Node):
         self.latest_smg = None
 
         self.sub_telemed = self.create_subscription(
-            Float32MultiArray, telemed_topic, self.telemed_cb, 10
+            SmgMsg, telemed_topic, self.telemed_cb, 10
         )
         self.sub_delsys = self.create_subscription(
-            Float32MultiArray, delsys_topic, self.delsys_cb, 10
+            EmgMsg, delsys_topic, self.delsys_cb, 10
         )
 
         self.get_logger().info(f"Subscribing telemed (SMG passthrough): {telemed_topic}")
