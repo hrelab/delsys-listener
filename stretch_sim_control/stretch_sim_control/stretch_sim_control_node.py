@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
-from stretch_sim_interfaces.msg import DelsysMsg, EmgMsg, SmgMsg, ImuMsg
+from std_msgs.msg import Int32MultiArray, Float64MultiArray
+from stretch_sim_interfaces.msg import EmgMsg, SmgMsg
 
 
 class StretchSimControlNode(Node):
@@ -17,9 +17,6 @@ class StretchSimControlNode(Node):
         # Threshold for EMG "active" detection
         self.declare_parameter('emg_threshold', 0.8)
 
-        # NEW: EMG channel handling
-        self.declare_parameter('emg_mode', 'first')      # 'first', 'any', 'all'
-
         # Refractory period (per EMG channel)
         self.declare_parameter('emg_refractory_sec', 1.0)
 
@@ -32,7 +29,7 @@ class StretchSimControlNode(Node):
         output_emg = self.get_parameter('output_emg').value
 
         self.pub_smg = self.create_publisher(Float64MultiArray, output_smg, 10)
-        self.pub_emg = self.create_publisher(Bool, output_emg, 10)
+        self.pub_emg = self.create_publisher(Int32MultiArray, output_emg, 10)
 
         self.latest_smg = None
 
@@ -50,12 +47,11 @@ class StretchSimControlNode(Node):
 
     def telemed_cb(self, msg: SmgMsg):
         out = Float64MultiArray()
-        out.data = [float(x) for x in msg.data]
+        out.data = [float(x) for x in msg.smg]
         self.pub_smg.publish(out)
 
     def delsys_cb(self, msg: EmgMsg):
         thr = float(self.get_parameter('emg_threshold').value)
-        mode = self.get_parameter('emg_mode').value
 
         # Combining sensors into one list
         nSens = len(msg.sensor_name)

@@ -6,20 +6,22 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     # ---------------- Launch arguments ----------------
+    # EMG Related
     emg_threshold = LaunchConfiguration('emg_threshold')
-    emg_mode = LaunchConfiguration('emg_mode')
     emg_refractory_sec = LaunchConfiguration('emg_refractory_sec')
-
     sample_rate_hz = LaunchConfiguration('sample_rate_hz')
     rms_window_ms = LaunchConfiguration('rms_window_ms')
 
+    # Delsys Processor Related
     delsys_in = LaunchConfiguration('delsys_in')
-    telemed_in = LaunchConfiguration('telemed_in')
-
     delsys_out_emg = LaunchConfiguration('delsys_out_emg')
     delsys_out_imu = LaunchConfiguration('delsys_out_imu')
+
+    # Telemed Processor Related
+    telemed_in = LaunchConfiguration('telemed_in')
     telemed_out = LaunchConfiguration('telemed_out')
 
+    # Sim Control Related
     output_emg = LaunchConfiguration('output_emg')
     output_smg = LaunchConfiguration('output_smg')
 
@@ -76,11 +78,6 @@ def generate_launch_description():
             description='Threshold applied to (rectified+RMS) EMG signal',
         ),
         DeclareLaunchArgument(
-            'emg_mode',
-            default_value='first',
-            description="How to combine EMG channels: 'first', 'any', or 'all'",
-        ),
-        DeclareLaunchArgument(
             'emg_refractory_sec',
             default_value='1.0',
             description='Per-channel EMG refractory period (seconds)',
@@ -120,13 +117,12 @@ def generate_launch_description():
             name='stretch_sim_control',
             output='screen',
             parameters=[{
-                'delsys_topic': delsys_out,
+                'delsys_topic': delsys_out_emg,
                 'telemed_topic': telemed_out,
                 'output_emg': output_emg,
                 'output_smg': output_smg,
 
                 'emg_threshold': emg_threshold,
-                'emg_mode': emg_mode,
                 'emg_refractory_sec': emg_refractory_sec,
             }],
         ),
