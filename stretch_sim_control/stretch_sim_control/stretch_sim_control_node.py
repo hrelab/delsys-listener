@@ -1,6 +1,5 @@
 import rclpy
 from rclpy.node import Node
-
 from std_msgs.msg import Float32MultiArray, Float64MultiArray, Bool
 
 
@@ -8,10 +7,11 @@ class StretchSimControlNode(Node):
     def __init__(self):
         super().__init__('stretch_sim_control')
 
-        self.declare_parameter('delsys_topic', 'delsys/processed_data')
-        self.declare_parameter('telemed_topic', 'telemed/processed_data')
-        self.declare_parameter('output_smg', 'stretch_sim/smg')
+        self.declare_parameter('delsys_topic', 'processed/emg')
         self.declare_parameter('output_emg', 'stretch_sim/emg')
+        
+        self.declare_parameter('telemed_topic', 'processed/smg')
+        self.declare_parameter('output_smg', 'stretch_sim/smg')
 
         # Threshold for EMG "active" detection
         self.declare_parameter('emg_threshold', 0.8)

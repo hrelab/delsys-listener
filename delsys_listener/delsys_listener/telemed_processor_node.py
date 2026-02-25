@@ -7,8 +7,8 @@ class TelemedProcessor(Node):
     def __init__(self):
         super().__init__('telemed_processor')
 
-        self.declare_parameter('input_topic', '/telemed/raw_data')
-        self.declare_parameter('output_topic', '/telemed/processed_data')
+        self.declare_parameter('input_topic', '/raw_data/smg')
+        self.declare_parameter('output_topic', '/processed/smg')
 
         input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
         output_topic = self.get_parameter('output_topic').get_parameter_value().string_value
