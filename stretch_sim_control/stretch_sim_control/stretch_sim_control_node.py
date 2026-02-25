@@ -46,9 +46,7 @@ class StretchSimControlNode(Node):
         self.get_logger().info(f"Publishing stretch_sim (EMG):          {output_emg}")
 
     def telemed_cb(self, msg: SmgMsg):
-        out = Float64MultiArray()
-        out.data = [float(x) for x in msg.smg]
-        self.pub_smg.publish(out)
+        self.pub_smg.publish(msg.smg)
 
     def delsys_cb(self, msg: EmgMsg):
         thr = float(self.get_parameter('emg_threshold').value)
