@@ -162,14 +162,6 @@ class DelsysProcessor(Node):
             gyro = [msg.gyro_x[0], msg.gyro_y[0], msg.gyro_z[0]]
             name = msg.sensor_name[0]
 
-            # Save new min and max if necessary (for each DOF (x,y,z))
-            for i in range(3):
-                if acc[i] < self.acc_min[i]: self.acc_min[i] = acc[i]
-                if acc[i] > self.acc_max[i]: self.acc_max[i] = acc[i]
-
-            print(f'Current min: {self.acc_min}')
-            print(f'Current max: {self.acc_max}')
-
             # Publish data
             outIMU = self.imu_to_msg(outIMU, acc, gyro, name)
             self.pubIMU.publish(outIMU)
