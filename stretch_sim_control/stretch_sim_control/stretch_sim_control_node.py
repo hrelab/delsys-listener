@@ -80,6 +80,22 @@ class StretchSimControlNode(Node):
 
         return command
     # -----------------------------------------------------------------------------
+    
+    # ---------------------------- MAP to COMMAND FUNC ----------------------------
+    def map_data(self, acc_y):
+        imu_min = -0.33
+        imu_max = 0.35
+
+        command = (acc_y-imu_max)/(imu_max-imu_min)
+
+        if self.command_prev is None:
+            self.command_prev = command
+
+        command = (self.alpha*acc_y) + (1-self.alpha)*self.command_prev
+        self.command_prev = command
+
+        return command
+    # -----------------------------------------------------------------------------
 
     # ---------------------------- IMU to COMMAND HERE ----------------------------
     def imu_cb(self, msg: ImuMsg):
