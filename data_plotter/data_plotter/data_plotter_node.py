@@ -1,9 +1,7 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int32MultiArray, Float64MultiArray
 from stretch_sim_interfaces.msg import EmgMsg, SmgMsg, ImuMsg
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
 EMG_TOPIC = "processed/emg"
