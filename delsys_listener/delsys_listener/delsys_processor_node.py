@@ -80,6 +80,9 @@ class DelsysProcessor(Node):
         # Optional: support runtime param updates (so you can switch 2000 <-> 2222.2222 without restart)
         self.add_on_set_parameters_callback(self._on_params)
 
+        self.acc_min = [0, 0, 0]
+        self.acc_max = [0, 0, 0]
+
     def _compute_window_size(self, fs_hz: float, win_ms: float) -> int:
         return max(1, int(round(fs_hz * (win_ms / 1000.0))))
 
@@ -111,14 +114,28 @@ class DelsysProcessor(Node):
             self._log_window()
 
         return rclpy.parameter.SetParametersResult(successful=True)
+    
+    def imu_to_msg(self, out, acc, gyro, sensor):
+        out.sensor_name.append(sensor)
+        out.acc_x.append(acc[0])
+        out.acc_y.append(acc[1])
+        out.acc_z.append(acc[3])
+        out.gyro_x.append(gyro[0])
+        out.gyro_y.append(gyro[1])
+        out.gyro_z.append(gyro[2])
+
+        return out
 
     def cb(self, msg: DelsysMsg):
+        # -------------- SETUP --------------
         nSens = len(msg.sensor_name)
         emgData = []
 
         outEMG = EmgMsg()
         outIMU = ImuMsg()
+        # -----------------------------------
 
+        # ----------------------- EMG PROCESSING HERE -----------------------
         # Combine all sensors into a single list for easy processing
         for i in range(nSens):
             emgData.extend([msg.emg1[i], msg.emg2[i], msg.emg3[i], msg.emg4[i]])
@@ -134,20 +151,29 @@ class DelsysProcessor(Node):
             outEMG.emg2.append(rms_vals[4*i + 1])
             outEMG.emg3.append(rms_vals[4*i + 2])
             outEMG.emg4.append(rms_vals[4*i + 3])
-            
-        # Currently no IMU processing
-        for i in range(nSens):
-            outIMU.sensor_name.append(msg.sensor_name[i])
-            outIMU.acc_x.append(msg.acc_x[i])
-            outIMU.acc_y.append(msg.acc_y[i])
-            outIMU.acc_z.append(msg.acc_z[i])
-            outIMU.gyro_x.append(msg.gyro_x[i])
-            outIMU.gyro_y.append(msg.gyro_y[i])
-            outIMU.gyro_z.append(msg.gyro_z[i])
 
-        # Publish data
         self.pubEMG.publish(outEMG)
-        self.pubIMU.publish(outIMU)
+        # -------------------------------------------------------------------
+            
+        # ----------------------- IMU PROCESSING HERE -----------------------
+        if msg.acc_x[0] is not float("nan"):
+            # Seperate data
+            acc = [msg.acc_x[0], msg.acc_y[0], msg.acc_z[0]]
+            gyro = [msg.gyro_x[0], msg.gyro_y[0], msg.gyro_z[0]]
+            name = msg.sensor_name[0]
+
+            # Save new min and max if necessary (for each DOF (x,y,z))
+            for i in range(3):
+                if acc[i] < self.acc_min[i]: self.acc_min[i] = acc[i]
+                if acc[i] > self.acc_max[i]: self.acc_max[i] = acc[i]
+
+            print(f'Current min: {self.acc_min}')
+            print(f'Current max: {self.acc_max}')
+
+            # Publish data
+            outIMU = self.imu_to_msg(outIMU, acc, gyro, name)
+            self.pubIMU.publish(outIMU)
+        # -------------------------------------------------------------------
 
 def main():
     rclpy.init()
