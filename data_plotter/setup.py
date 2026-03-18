@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'stretch_sim_control_node = stretch_sim_control.stretch_sim_control_node:main',
         ],
     },
 )
