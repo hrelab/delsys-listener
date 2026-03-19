@@ -123,7 +123,7 @@ class DelsysProcessor(Node):
         out.sensor_name.append(sensor)
         out.acc_x.append(acc[0])
         out.acc_y.append(acc[1])
-        out.acc_z.append(acc[3])
+        out.acc_z.append(acc[2])
         out.gyro_x.append(gyro[0])
         out.gyro_y.append(gyro[1])
         out.gyro_z.append(gyro[2])
