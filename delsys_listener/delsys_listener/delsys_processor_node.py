@@ -5,8 +5,10 @@ import rclpy
 from rclpy.node import Node
 from stretch_sim_interfaces.msg import DelsysMsg, EmgMsg, ImuMsg
 
+
 class RollingRMS:
     """Per-channel rolling RMS over a fixed window of samples."""
+
     def __init__(self, window_size: int):
         self.set_window(window_size)
         self.buffers = []
@@ -18,7 +20,8 @@ class RollingRMS:
         self.window_size = int(window_size)
 
     def reset_channels(self, n_channels: int):
-        self.buffers = [deque(maxlen=self.window_size) for _ in range(n_channels)]
+        self.buffers = [deque(maxlen=self.window_size)
+                        for _ in range(n_channels)]
         self.sumsq = [0.0 for _ in range(n_channels)]
 
     def update(self, x_rectified):
@@ -71,7 +74,8 @@ class DelsysProcessor(Node):
 
         self.pubEMG = self.create_publisher(EmgMsg, output_emg, 10)
         self.pubIMU = self.create_publisher(ImuMsg, output_imu, 10)
-        self.sub = self.create_subscription(DelsysMsg, input_topic, self.cb, 10)
+        self.sub = self.create_subscription(
+            DelsysMsg, input_topic, self.cb, 10)
 
         self.get_logger().info(f"Listening on: {input_topic}")
         self.get_logger().info(f"Publishing to: {output_emg} and {output_imu}")
@@ -114,7 +118,7 @@ class DelsysProcessor(Node):
             self._log_window()
 
         return rclpy.parameter.SetParametersResult(successful=True)
-    
+
     def imu_to_msg(self, out, acc, gyro, sensor):
         out.sensor_name.append(sensor)
         out.acc_x.append(acc[0])
@@ -125,6 +129,14 @@ class DelsysProcessor(Node):
         out.gyro_z.append(gyro[2])
 
         return out
+
+    # TODO:
+    def emg_processing():
+        pass
+
+    # TODO:
+    def imu_processing():
+        pass
 
     def cb(self, msg: DelsysMsg):
         # -------------- SETUP --------------
@@ -138,7 +150,8 @@ class DelsysProcessor(Node):
         # ----------------------- EMG PROCESSING HERE -----------------------
         # Combine all sensors into a single list for easy processing
         for i in range(nSens):
-            emgData.extend([msg.emg1[i], msg.emg2[i], msg.emg3[i], msg.emg4[i]])
+            emgData.extend([msg.emg1[i], msg.emg2[i],
+                           msg.emg3[i], msg.emg4[i]])
 
         # Process EMG data
         rectified = [abs(float(x)) for x in emgData]
@@ -154,7 +167,7 @@ class DelsysProcessor(Node):
 
         self.pubEMG.publish(outEMG)
         # -------------------------------------------------------------------
-            
+
         # ----------------------- IMU PROCESSING HERE -----------------------
         if msg.acc_x[0] is not float("nan"):
             # Seperate data
@@ -166,6 +179,7 @@ class DelsysProcessor(Node):
             outIMU = self.imu_to_msg(outIMU, acc, gyro, name)
             self.pubIMU.publish(outIMU)
         # -------------------------------------------------------------------
+
 
 def main():
     rclpy.init()
