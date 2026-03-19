@@ -169,7 +169,7 @@ class DelsysProcessor(Node):
         # -------------------------------------------------------------------
 
         # ----------------------- IMU PROCESSING HERE -----------------------
-        if msg.acc_x[0] is not float("nan"):
+        if math.isnan(msg.acc_x[0]):
             # Seperate data
             acc = [msg.acc_x[0], msg.acc_y[0], msg.acc_z[0]]
             gyro = [msg.gyro_x[0], msg.gyro_y[0], msg.gyro_z[0]]
