@@ -161,7 +161,7 @@ class StretchSimControlNode(Node):
 
         out = Int32MultiArray()
         out.data = [int(x) for x in gated_channels]
-        self.pub_emg.publish(out)
+        # self.pub_emg.publish(out)
 
 
 def main():
