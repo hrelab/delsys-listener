@@ -86,6 +86,8 @@ class StretchSimControlNode(Node):
         imu_min = -0.33
         imu_max = 0.35
 
+        print("Hello")
+
         command = (acc[1]-self.acc_max[1])/(self.acc_max[1]-self.acc_min[1])
 
         if self.command_prev is None:
@@ -111,16 +113,17 @@ class StretchSimControlNode(Node):
             if acc[i] > self.acc_max[i]: self.acc_max[i] = acc[i]
 
         command = self.map_data(acc)
-        out.data.append((command-0.2)/(-0.9+0.2))
+        out.data.append(command)
         
         # Publish Command
-        self.pub_imu.publish(out)
+        self.pub_smg.publish(out)
+        # self.pub_imu.publish(out)
     # -----------------------------------------------------------------------------
 
     def smg_cb(self, msg: SmgMsg):
         out = Float64MultiArray()
         out.data = msg.smg
-        self.pub_smg.publish(out)
+        # self.pub_smg.publish(out)
 
     def emg_cb(self, msg: EmgMsg):
         thr = float(self.get_parameter('emg_threshold').value)
