@@ -51,8 +51,8 @@ class StretchSimControlNode(Node):
             ImuMsg, imu_topic, self.imu_cb, 10
         )
 
-        self.acc_max = 0
-        self.acc_min = 0
+        self.acc_max = [0,0,0]
+        self.acc_min = [0,0,0]
 
         self.command_prev = 0
         self.alpha = 0.1
@@ -82,16 +82,16 @@ class StretchSimControlNode(Node):
     # -----------------------------------------------------------------------------
     
     # ---------------------------- MAP to COMMAND FUNC ----------------------------
-    def map_data(self, acc_y):
+    def map_data(self, acc):
         imu_min = -0.33
         imu_max = 0.35
 
-        command = (acc_y-imu_max)/(imu_max-imu_min)
+        command = (acc[1]-self.acc_max[1])/(self.acc_max[1]-self.acc_min[1])
 
         if self.command_prev is None:
             self.command_prev = command
 
-        command = (self.alpha*acc_y) + (1-self.alpha)*self.command_prev
+        command = (self.alpha*acc[1]) + (1-self.alpha)*self.command_prev
         self.command_prev = command
 
         return command
@@ -110,7 +110,7 @@ class StretchSimControlNode(Node):
             if acc[i] < self.acc_min[i]: self.acc_min[i] = acc[i]
             if acc[i] > self.acc_max[i]: self.acc_max[i] = acc[i]
 
-        command = self.PCA_2_command(acc)
+        command = self.map_data(acc)
         out.data.append((command-0.2)/(-0.9+0.2))
         
         # Publish Command
