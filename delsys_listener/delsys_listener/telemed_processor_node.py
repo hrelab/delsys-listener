@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from stretch_sim_interfaces.msg import SmgMsg
-
+from hre_interfaces.msg import Smg as SmgMsg
 
 class TelemedProcessor(Node):
     def __init__(self):

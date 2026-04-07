@@ -1,7 +1,9 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32MultiArray, Float64MultiArray
-from stretch_sim_interfaces.msg import EmgMsg, SmgMsg, ImuMsg
+from hre_interfaces.msg import Imu as ImuMsg
+from hre_interfaces.msg import Smg as SmgMsg
+from hre_interfaces.msg import Emg as EmgMsg
 import numpy as np
 
 

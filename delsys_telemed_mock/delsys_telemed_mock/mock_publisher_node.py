@@ -4,8 +4,8 @@ import time
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
-from stretch_sim_interfaces.msg import DelsysMsg, SmgMsg
+from hre_interfaces.msg import Delsys as DelsysMsg
+from hre_interfaces.msg import Smg as SmgMsg
 
 KEYS = ["EMG 1", "EMG 2", "EMG 3", "EMG 4", "ACC X", "ACC Y", "ACC Z", "GYRO X", "GYRO Y", "GYRO Z"]
 

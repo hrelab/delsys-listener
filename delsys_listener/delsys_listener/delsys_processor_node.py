@@ -3,7 +3,9 @@ from collections import deque
 
 import rclpy
 from rclpy.node import Node
-from stretch_sim_interfaces.msg import DelsysMsg, EmgMsg, ImuMsg
+from hre_interfaces.msg import Delsys as DelsysMsg
+from hre_interfaces.msg import Imu as ImuMsg
+from hre_interfaces.msg import Emg as EmgMsg
 
 
 class RollingRMS:
